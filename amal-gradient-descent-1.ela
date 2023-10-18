@@ -1,0 +1,126 @@
+gradient-descent:
+  functional$ela::
+    return f.compileArgs('create')(mapQueue.value.mapQueue.create) <- mapQueue:
+      mapQueue(object)::
+        def init$():
+          .defn = keywords$()
+
+        def call$(v):
+          return keywords$('sum', identity.compileArgs('v')) \
+            ('kernel/callObject$' \
+              ('functools.reduce', pf.compileArgs('v', 'f'), \
+               args$slice(1), v)) \
+
+            <- identity:
+              return v
+
+            <- pf:
+              return 'kernel/callObject$' \
+                ('functools.reduce', pv.compileArgs('v', 'f'), \
+                 f, v) <- pv:
+
+                return f(v)
+
+      <- f:
+        return create \
+          (coefficient = [integer], \
+           exponent = [integer], \
+           name = string, operation = string) \
+            (.value) <- instance: # , d, i)
+
+            - [3, 1, x]
+
+
+  objective$ela::
+    return math$function.compiled(mapping(create = \
+      algorithm$foundation.value.mapQueue.create, \
+      data = personal$data)) \
+
+      <- algorithm$foundation:
+        mapQueue(object)::
+          def init$():
+            .defn = keywords$()
+
+          def call$(v):
+            return keywords$('sum', identity) \
+              ('kernel/callObject$' \
+                ('functools.reduce', pf, args$slice(1), v))
+
+          def identity(v):
+            return v
+
+          def pf(v, f):
+            return 'kernel/callObject$' \
+              ('functools.reduce', pv, f, v)
+
+          def pv(v, f):
+            return f(v)
+
+      <- math$function:
+        return create \
+          (coefficient = [integer], \
+           exponent = [integer], \
+           name = string, operation = string) \
+            (data.value) # , d, i)
+
+      <- personal$data:
+        - [3, 1, x]
+
+
+  py::
+    return run$python(py, mapping()) <- py:
+      from functools import reduce
+
+      class mapQueue(list):
+        def __init__(self, **kwd):
+          self.defn = kwd
+
+        sum = staticmethod(lambda v: v)
+
+        inner = staticmethod(lambda v, f: f(v))
+        outer = staticmethod \
+          (lambda v, f: reduce \
+            (self.inner, f, v))
+
+        def __call__(self, data, *args):
+          return self.sum(reduce \
+            (self.outer, args, data))
+
+      __return = mapQueue \
+        (coefficient = [int], exponent = [int],
+         name = str, operation = str) \
+          ([[3, 1, 'x']]) # , d, f)
+
+
+  inline$ela::
+    x = ::
+        mapQueue(object)::
+          def init$():
+            .reduce = 'kernel/lookup$'('functools.reduce')
+            .sum = .identity # sum
+
+          def identity(v):
+            return v
+
+          def call$(v):
+            return .sum \
+              (bind[.](.reduce, ::
+                 return .reduce(::
+                   return f(v)
+
+                 .compileArgs('v', 'f'), f, v)
+
+               .defaultArgs \
+                 ('f', 'v'), \
+                 args$slice(1), v))
+
+      .value.mapQueue.create \
+        (coefficient = [integer], \
+         exponent = [integer], \
+         name = string, operation = string) \
+          (::
+            - [3, 1, x]
+
+          .value) # , d, i)
+
+    return x # preceding inline code incompatible with return ::
