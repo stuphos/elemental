@@ -93,6 +93,7 @@ gradient-descent:
 
 
   inline$ela::
+    # (When X went off the yard)
     x = ::
         mapQueue(object)::
           def init$():
