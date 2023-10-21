@@ -18,7 +18,7 @@ def crypt(a, b):
     a = string(a).encode()
     b = string(b).encode()
 
-    return parallel(true, true, c, a, b)
+    return parallel(false, true, c, a, b) # Q: tail call??
 
 
 # The above is distilled from ideas below.
