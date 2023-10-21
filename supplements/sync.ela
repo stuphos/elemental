@@ -1,0 +1,143 @@
+def progressClass():
+    return run$python(code, valueName = 'progress') <- code:
+        from stuphos.runtime.architecture import \
+            baseExceptionValue as ExceptionValue, # todo: use real ExceptionValue...
+            Continuation, ExceptionType, writeprotected,
+
+        from stuphos.kernel import interpreter
+
+
+        class progress(writeprotected):
+            # Safely call a (non-continuation-based) procedure and post its
+            # return value (or exception) to channel.
+
+            # Note: purpose of this class is not to do low-level synchronization anymore...
+            # from threading import Condition as _syncClass
+
+            def __init__(self, channel):
+                if not isinstance(channel, interpreter.ipc.channel):
+                    raise TypeError(channel.__class__)
+
+                # self._sync = self._syncClass()
+                self._channel = channel
+
+            def _call(self, procedure, *args, **kwd):
+                try: r = procedure(*args, **kwd)
+                except Continuation as e:
+                    # Note: Not necessarily yet recoverable in a generalized way.
+                    raise SystemError from e
+
+                except Exception as e:
+                    self._channel.write((False, ExceptionValue \
+                        (e, type = ExceptionType(e.__class__))))
+                else:
+                    self._channel.write((True, r))
+
+                # self._sync.wait()
+
+            _billable = True
+
+            def _parallelCall(self, *args, **kwd):
+                return runtime[runtime.System.Engine.Pool] \
+                    .pool.taskExecuteCurrent \
+                    (True, self._billable, self._call, *args, **kwd)
+
+            __call__ = _parallelCall
+
+            def get(self):
+                return self._channel.get()
+
+
+    usage: # (ela):
+        p = progressClass()(channel())
+
+        task$(consumer.compileArgs('get'), p.get) <- consumer:
+            while true:
+                scatter(get(), 'success', 'value')
+                success = success and 'result' or 'error'
+                'kernel/info'('%s: %r' % [success, value])
+
+        # calc = run$python$compile(calc).defineArgs('x') <- calc:
+        #   while True:
+        #       return x # doCalculation
+
+        calc = 'kernel/lookup$'('ctypes.cdll').math.sin
+
+        task$(producer.compileArgs('p', 'c'), p, calc) <- producer:
+            for x in range(10):
+                p(calc, x)
+
+
+def breakage():
+    return act(breakageClass(), args$(), keywords$())
+
+def breakageClass():
+    return run$python(code, valueName = 'breakage') <- code:
+        class breakage:
+            from threading import Event as syncClass
+
+            # Note: more specifically not an ela routine.
+            def __init__(self, scheduler):
+                self.scheduler = scheduler
+                self.sync = self.syncClass()
+                self.resume() # proceed
+
+            def call(self, procedure, *args, **kwd):
+                try: return procedure(*args, **kwd)
+                finally:
+                    self.scheduler.resumeNext()
+                    self.sync.wait()
+
+            __call__ = call
+
+            def resume(self):
+                self.sync.set()
+
+            def stop(self):
+                self.sync.clear()
+
+
+def scheduler():
+    return act(schedulerClass(), args$(), keywords$())
+
+def schedulerClass():
+    return run$python(code, valueName = 'scheduler') <- code:
+        # XXX two systems here, should just be one
+        from time import time
+
+        class scheduler(list):
+            signal = NotImplemented
+            FREQUENCY = NotImplemented
+
+            def start(self):
+                self.last = time()
+                self.signal.on(self.FREQUENCY, self.cycle)
+
+            def add(self, timeslice, stop, resume):
+                self.append((timeslice, stop, resume))
+                self.reschedule()
+
+            def cycle(self):
+                now = time()
+                e = now - self.last
+
+                for (timeslice, stop, resume) in self:
+                    if e >= timeslice:
+                        stop()
+
+                self.last = now # time()
+
+            def resumeNext(self):
+                self.pop(0)[2]()
+
+
+usage:
+    s = scheduler()
+    b = breakage(s)
+
+    s.add(timeslice, b.stop, b.resume)
+    s.start()
+
+    b(run$python$compile(code).defineArgs()) <- code:
+        while True:
+            break # doCalculation()
