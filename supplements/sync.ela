@@ -1,3 +1,27 @@
+def crypt(a, b):
+    doc:
+        Call system crypt function in parallel system thread.
+
+
+    parallel = 'kernel/callObject$' \
+        ('stuphos.runtime.registry.getObject', \
+         'System::Engine::Pool').pool.taskExecuteCurrent
+
+
+    ctypes = 'kernel/lookup$'('ctypes')
+
+    c = ctypes.CDLL('/lib/libcrypt.so').crypt
+    c.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    c.restype = ctypes.c_char_p
+
+
+    a = string(a).encode()
+    b = string(b).encode()
+
+    return parallel(true, true, c, a, b)
+
+
+# The above is distilled from ideas below.
 def progressClass():
     return run$python(code, valueName = 'progress') <- code:
         from stuphos.runtime.architecture import \
