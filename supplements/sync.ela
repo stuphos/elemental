@@ -1,4 +1,21 @@
 def crypt(a, b):
+    return 'kernel/gen' \
+        ('parallel', \
+         ctypes$crypt(), \
+         string(a).encode(), \
+         string(b).encode())
+
+
+def ctypes$crypt():
+    ctypes = 'kernel/lookup$'('ctypes')
+
+    c = ctypes.CDLL('/lib/libcrypt.so').crypt
+    c.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    c.restype = ctypes.c_char_p
+
+    return c
+
+def crypt1(a, b):
     doc:
         Call system crypt function in parallel system thread.
 
@@ -7,18 +24,14 @@ def crypt(a, b):
         ('stuphos.runtime.registry.getObject', \
          'System::Engine::Pool').pool.taskExecuteCurrent
 
-
-    ctypes = 'kernel/lookup$'('ctypes')
-
-    c = ctypes.CDLL('/lib/libcrypt.so').crypt
-    c.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
-    c.restype = ctypes.c_char_p
+    # parallel = 'kernel/gen'('registryObject', 'System::Engine::Pool') \
+    #     .pool.taskExecuteCurrent
 
 
     a = string(a).encode()
     b = string(b).encode()
 
-    return parallel(false, true, c, a, b) # Q: tail call??
+    return parallel(false, true, ctypes$crypt(), a, b) # Q: tail call??
 
 
 # The above is distilled from ideas below.
