@@ -1,0 +1,58 @@
+ctypes$module = 'kernel/lookup$'('ctypes')
+
+ctypes$types = ctypes$types.value <- ctypes$types:
+    - short
+    - ushort
+    - long
+    - ulong
+    - int
+    - uint
+    - float
+    - double
+    - longdouble
+    - longlong
+    - ulonglong
+    - ubyte
+    - byte
+    - char
+    - char_p
+    - void_p
+    - bool
+    - wchar_p
+    - wchar
+    - size_t
+    - ssize_t
+    - int8
+    - uint8
+    - int16
+    - int32
+    - int64
+    - time_t
+
+
+def ctype(name):
+    # Todo: struct type, array, etc.
+    if name == 'py_object':
+        return ctypes$module.py_object
+
+    if name in ctypes$types:
+        return getmember(ctypes$module, 'c_' + name)
+
+    raise(name$error(name))
+
+
+def ctype$args(args):
+    a = []
+
+    for a in args:
+        a.append(ctype(a))
+
+    return a
+
+def function(libpath, name, restype):
+    f = ctypes$module.CDLL(libpath)[name]
+
+    f.restype = ctype(restype)
+    f.argtypes = ctype$args(args$slice(3))
+
+    return f

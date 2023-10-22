@@ -7,6 +7,10 @@ def crypt(a, b):
 
 
 def ctypes$crypt():
+    # return ..ctypes.function \
+    #     ('/lib/libcrypt.so', 'crypt',
+    #      'char_p', 'char_p', 'char_p')
+
     ctypes = 'kernel/lookup$'('ctypes')
 
     c = ctypes.CDLL('/lib/libcrypt.so').crypt
