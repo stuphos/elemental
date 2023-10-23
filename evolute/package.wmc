@@ -108,3 +108,18 @@ translate(view):
             <input type="submit" name="Translate">
         </form>
         {% endif %}
+
+
+buildchain(method)::
+    scatter$args('code')
+    return ...cython.buildchain.instance \
+        ('/'.join(path.value), \
+         code) \
+
+    <- path:
+        - ''
+        - home
+        - variables
+        - projects
+        - itham
+        - deployments
