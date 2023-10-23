@@ -1,0 +1,110 @@
+configuration:
+    access: read
+    permission:
+        - 'evolute:translation'
+
+    method: null # ph.interpreter.mental.python_transpile.transpile
+
+    rate: 0.00001
+    timeslice: 20
+    sessionkey: evolute$lasttime
+
+
+estimate$timeslice(method)::
+    scatter$args('code')
+    return length(code) * container.configuration.rate
+
+has$timeslice(method)::
+    scatter$args('last', 'code')
+    est = container.estimate$timeslice(code)
+
+    return est < (now() - last)
+
+get$lasttime(method)::
+    scatter$args('request')
+
+    try:
+        return 'text/json/loads' \
+            (request.user.securityContext(request.sessionGet, \
+                container.configuration.sessionkey))
+
+    except key$error e:
+        # raise(e)
+        return 0 # a time_t
+
+set$lasttime(method)::
+    scatter$args('request', 'end')
+    request.user.securityContext \
+        ('kernel/getAttrUnsafe' \
+            (request, '_sessionSet'), \
+            container.configuration.sessionkey, \
+            'text/json/dumps'(end))
+
+
+translateCode(method)::
+    scatter$args('code')
+
+    method = container.configuration.method
+    if method:
+        return 'kernel/callObject$' \
+            (method, code)
+
+    return code # test
+
+
+translateCode$request(method)::
+    scatter$args('request', 'code') # , ['path$', none])
+
+    last = container.get$lasttime(request)
+
+    if container.has$timeslice(last, code):
+        request.user.securityContext(checkAccess, \
+            path$ + sequence(container.configuration.permission), \
+            container.configuration.access)
+
+
+        r = container.translateCode(code)
+
+        next = now() + container.configuration.timeslice
+        container.set$lasttime(request, next)
+
+        return r
+
+
+# lang:
+#     evolute(alias): components/interpreter/evolute/views/translate
+
+translate(view):
+    debug: true
+    context(trigger)::
+        # return '/'.join(path$) # test
+
+        if request.method == 'POST':
+            code = request.POST['code']
+            context['error'] = true
+
+            return container.translateCode$request \
+                (request, code)
+
+    template::
+        {% if message %}
+        {{ message }}
+        {% elif error %}
+        Not available yet.
+        {% else %}
+        <style type="text/css">
+        .translation textarea
+        {
+            width: 600px;
+            height: 400px;
+        }
+        </style>
+
+        <form method="POST" class="translation"
+              action="/page/components/interpreter/evolute/views/translate">
+            <textarea name="code">
+            </textarea>
+            <br />
+            <input type="submit" name="Translate">
+        </form>
+        {% endif %}
