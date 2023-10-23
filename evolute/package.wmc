@@ -1,3 +1,4 @@
+# Executable security configuration provider.
 configuration:
     access: read
     permission:
@@ -35,10 +36,9 @@ get$lasttime(method)::
 set$lasttime(method)::
     scatter$args('request', 'end')
     request.user.securityContext \
-        ('kernel/getAttrUnsafe' \
-            (request, '_sessionSet'), \
-            container.configuration.sessionkey, \
-            'text/json/dumps'(end))
+        ('kernel/getAttrUnsafe'(request, '_sessionSet'), \
+         container.configuration.sessionkey, \
+         'text/json/dumps'(end))
 
 
 translateCode(method)::
