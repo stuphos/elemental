@@ -1,2 +1,4 @@
 platform: neutrinet
-brand: allray
+brand:
+	- allray
+	- cloudcom
