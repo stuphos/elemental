@@ -1,4 +1,6 @@
-platform: neutrinet
+platform: BCI
+transport: neutrinet
+
 brand:
 	- allray
 	- cloudcom
