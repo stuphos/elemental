@@ -1,6 +1,9 @@
 platform: BCI
 transport: neutrinet
 
+signatures:
+	- 9d0c65a398b6a34b1dd0f07fc81f7765fbbcb3ecbb566483a440a9c308d45388
+
 brand:
 	- allray
 	- cloudcom
