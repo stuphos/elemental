@@ -3,17 +3,16 @@ def messageCommand(handle, package):
     e = keywords$('engine', none)
     i = keywords$('self', none)
 
-    self = i or e and \
-        namespace \
-            (dataChannel = keywords$('dataChannel, none) or \
-                handle.encoding.EntitySpace())
-
-    i.engine = e or handle.Engine()
+    self = i or namespace \
+        (engine = e or handle.Engine(), \
+         dataChannel = keywords$('dataChannel, none) or \
+            handle.encoding.EntitySpace())
 
     if is$none(i):
-        self.mode = e.application.InitialMode()
+        # New peerish initialization.
+        self.mode = i.engine.application.InitialMode()
         self.messenger = messageCommand.action(handle)
-        self.send = handle.CommandMessage.handleIncomingPackage.action(self)
+        self.send = action(handle.CommandMessage.handleIncomingPackage, self)
 
     if is$not$none(self):
         return self.send(none, package)
