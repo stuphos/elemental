@@ -4,15 +4,24 @@ def messageCommand(handle, package):
     i = keywords$('self', none)
 
     self = i or namespace \
-        (engine = e or handle.Engine(), \
-         dataChannel = keywords$('dataChannel, none) or \
-            handle.encoding.EntitySpace())
+        (dataChannel = keywords$('dataChannel, none) or \
+            handle.encoding.EntitySpace(), \
+         engine = e or handle.Engine \
+            (keywords$('appl', none) or \
+             handle.Application \
+                (handle.Configuration.FromString \
+                    (keywords$('config'), \
+                     default_section = 'Application'))))
+
+self.api.plugApi(api.NAME, api)
 
     if is$none(i):
         # New peerish initialization.
-        self.mode = i.engine.application.InitialMode()
+        self.mode = self.engine.application.InitialMode()
         self.messenger = messageCommand.action(handle)
         self.send = action(handle.CommandMessage.handleIncomingPackage, self)
+
+        self.engine.application.api.plugApi('messaging', handle.MessagingService())
 
     if is$not$none(self):
         return self.send(none, package)
@@ -27,14 +36,24 @@ newMessageCommand = messageCommand.action \
 
 
 # .space = newMessageCommand('')
-# .space.send(.space.dataChannel.packMessage(true))
+# .space.send(.space.dataChannel.packMessage \
+#     (['messaging.interpret', security$context$new(), \
+#       compile, code])) <- code:
 
 '''
 
 from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
-    .messaging import Engine, Command # , Application
+    .messaging import Engine, Command, Service, Application, Configuration
 
 # getSystemException
+
+# _securityContext
+
+class MessagingService(Service):
+    def doInterpret(self, access, compile, code):
+        if isinstance(access, _securityContext):
+            code = _invokeCode(lambda: access(compile, code))
+            return _invokeCode(lambda: access(code))
 
 class CommandMessage(Engine.Message):
     def __init__(self, peer, mode, command):
