@@ -37,8 +37,9 @@ newMessageCommand = messageCommand.action \
 
 # .space = newMessageCommand('')
 # .space.send(.space.dataChannel.packMessage \
-#     (['messaging.interpret', security$context$new(), \
-#       compile, code])) <- code:
+#     (['messaging.interpret', \
+        security$context$new(), \
+#       code])) <- code:
 
 '''
 
@@ -48,12 +49,15 @@ from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
 # getSystemException
 
 # _securityContext
+# _invokeCode
+# _compile
 
 class MessagingService(Service):
-    def doInterpret(self, access, compile, code):
+    def doInterpret(self, access, code):
         if isinstance(access, _securityContext):
-            code = _invokeCode(lambda: access(compile, code))
+            code = _invokeCode(lambda: access(_compile, code))
             return _invokeCode(lambda: access(code))
+
 
 class CommandMessage(Engine.Message):
     def __init__(self, peer, mode, command):
