@@ -1,5 +1,5 @@
 '''
-def handleIncomingPackage(handle, package):
+def messageCommand(handle, package):
     e = keywords$('engine', none)
     i = keywords$('self', none)
 
@@ -8,28 +8,27 @@ def handleIncomingPackage(handle, package):
             (dataChannel = keywords$('dataChannel, none) or \
                 handle.encoding.EntitySpace())
 
-    if is$not$none(i):
-        i.messenger = handle.action(i)
-        i.engine = e or handle.Engine()
-        i.mode = e.application.InitialMode()
+    i.engine = e or handle.Engine()
+
+    if is$none(i):
+        self.mode = e.application.InitialMode()
+        self.messenger = messageCommand.action(handle)
+        self.send = handle.CommandMessage.handleIncomingPackage.action(self)
 
     if is$not$none(self):
-        handle.CommandMessage.handleIncomingPackage \
-            (self, none, package)
+        return self.send(none, package)
 
-        return self
-
-newMessenger = handleIncomingPackage.action \
+newMessageCommand = messageCommand.action \
     ('kernel/lookup$seq'(handle.value)) \
 
     <- handle:
-        # - universal
+        - using
         - m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633
         - messaging
 
 
-# space = newMessenger('')
-# space.messenger('')
+# .space = newMessageCommand('')
+# .space.send(.space.dataChannel.packMessage(true))
 
 '''
 
@@ -54,6 +53,8 @@ class CommandMessage(Engine.Message):
         if cmd is not None:
             self.engine.postMessage \
                 (cls(peer, self.mode, cmd))
+
+        return self
 
     def dispatch(self, engine):
         with engine.Controller(self.peer):
