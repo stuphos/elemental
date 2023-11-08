@@ -34,10 +34,9 @@ newMessenger = handleIncomingPackage.action \
 '''
 
 from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
-    .messaging import Engine, Command, Application
-from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
-    .messaging.encoding import EntitySpace
+    .messaging import Engine, Command # , Application
 
+# getSystemException
 
 class CommandMessage(Engine.Message):
     def __init__(self, peer, mode, command):
@@ -70,9 +69,13 @@ class CommandMessage(Engine.Message):
                     assert nr is not None
                     assert nr not in self.peer.deferred_response
                     self.peer.deferred_response[nr] = d
+
             except:
-                self.peer.handleCommandException(engine, self.cmd, getSystemException())
+                self.peer.handleCommandException \
+                    (engine, self.cmd, getSystemException())
                 self.peer.interruptTimeout()
+
             else:
-                self.peer.handleCommandResponse(engine, self.cmd, response)
+                self.peer.handleCommandResponse \
+                    (engine, self.cmd, response)
                 self.peer.interruptTimeout()
