@@ -38,8 +38,7 @@ newMessageCommand = messageCommand.action \
 # .space = newMessageCommand('')
 # .space.send(.space.dataChannel.packMessage \
 #     (['messaging.interpret', \
-        security$context$new(), \
-#       code])) <- code:
+#       programmer(), code])) <- code:
 
 '''
 
@@ -54,9 +53,9 @@ from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
 
 class MessagingService(Service):
     def doInterpret(self, access, code):
-        if isinstance(access, _securityContext):
-            code = _invokeCode(lambda: access(_compile, code))
-            return _invokeCode(lambda: access(code))
+        access = _securityContext(access)
+        code = _invokeCode(lambda: access(_compile, code))
+        return _invokeCode(lambda: access(code))
 
 
 class CommandMessage(Engine.Message):
