@@ -13,8 +13,6 @@ def messageCommand(handle, package):
                     (keywords$('config'), \
                      default_section = 'Application'))))
 
-self.api.plugApi(api.NAME, api)
-
     if is$none(i):
         # New peerish initialization.
         self.mode = self.engine.application.InitialMode()
@@ -26,6 +24,9 @@ self.api.plugApi(api.NAME, api)
     if is$not$none(self):
         return self.send(none, package)
 
+
+scope = mapping()
+
 newMessageCommand = messageCommand.action \
     ('kernel/lookup$seq'(handle.value)) \
 
@@ -35,10 +36,16 @@ newMessageCommand = messageCommand.action \
         - messaging
 
 
-# .space = newMessageCommand('')
-# .space.send(.space.dataChannel.packMessage \
-#     (['messaging.interpret', \
-#       programmer(), code])) <- code:
+(view):
+    context(trigger)::
+        space = newMessageCommand('')
+        space.send(space.dataChannel.packMessage \
+            (['messaging.interpret', scope \
+                [request.user.securityContext(programmer)], \
+              code])) <- code:
+
+            return .value <- instance$:
+                'core/routines'
 
 '''
 
