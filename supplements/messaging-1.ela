@@ -1,0 +1,78 @@
+'''
+def handleIncomingPackage(handle, package):
+    e = keywords$('engine', none)
+    i = keywords$('self', none)
+
+    self = i or e and \
+        namespace \
+            (dataChannel = keywords$('dataChannel, none) or \
+                handle.encoding.EntitySpace())
+
+    if is$not$none(i):
+        i.messenger = handle.action(i)
+        i.engine = e or handle.Engine()
+        i.mode = e.application.InitialMode()
+
+    if is$not$none(self):
+        handle.CommandMessage.handleIncomingPackage \
+            (self, none, package)
+
+        return self
+
+newMessenger = handleIncomingPackage.action \
+    ('kernel/lookup$seq'(handle.value)) \
+
+    <- handle:
+        # - universal
+        - m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633
+        - messaging
+
+
+# space = newMessenger('')
+# space.messenger('')
+
+'''
+
+from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
+    .messaging import Engine, Command, Application
+from m6ab56a49c6d24ef54ee1cd19316f9a6ff9ab6fb528d26898911cbc7789445633 \
+    .messaging.encoding import EntitySpace
+
+
+class CommandMessage(Engine.Message):
+    def __init__(self, peer, mode, command):
+        self.peer = peer
+        self.mode = mode
+        self.command = command
+
+    def __repr__(self):
+        return '<%s: %r>' % (self.__class__.__name__,
+                             self.command)
+
+    @classmethod
+    def handleIncomingPackage(cls, self, peer, package):
+        cmd = Command.FromPackage(package, self.dataChannel)
+        if cmd is not None:
+            self.engine.postMessage \
+                (cls(peer, self.mode, cmd))
+
+    def dispatch(self, engine):
+        with engine.Controller(self.peer):
+            # The client kwd names could interfere with the actual method params.
+            try: response = self.mode.interpretCommand \
+                (engine, self.peer, self.cmd.command,
+                 *self.cmd.args, **self.cmd.kwd)
+
+            except self.peer.ResponseDeferred as e:
+                d = e.bind(self.peer, self.cmd)
+                if e.tracked:
+                    nr = self.cmd.serialId
+                    assert nr is not None
+                    assert nr not in self.peer.deferred_response
+                    self.peer.deferred_response[nr] = d
+            except:
+                self.peer.handleCommandException(engine, self.cmd, getSystemException())
+                self.peer.interruptTimeout()
+            else:
+                self.peer.handleCommandResponse(engine, self.cmd, response)
+                self.peer.interruptTimeout()
