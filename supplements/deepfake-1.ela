@@ -10,7 +10,7 @@ is_deepfake = lambda model, data: \
 factor_model = lambda a, b: a * b
 
 
-assertEquals \
-	(is_deepfake(factor_model, factor_model('Tell me what others want to know.', 1))
-		('Tell me what others want to know.', 1),
-	 True)
+lambda prompt = 'Tell me what others want to know.': \
+	assertEquals(is_deepfake(factor_model,
+		factor_model(prompt, 1))
+			(prompt, 1), True)
