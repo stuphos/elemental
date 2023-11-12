@@ -14,5 +14,5 @@ is_factor_deepfake = lambda data: \
 	lambda *args: factor_deepfake_detector(data, *args)
 
 
-temporal_detection_data = a * b
+temporal_detection_data = factor_model(a, b)
 is_factor_deepfake(temporal_detection_data)(a, b)
