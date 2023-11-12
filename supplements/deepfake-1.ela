@@ -12,7 +12,8 @@ factor_model = lambda a, b: a * b
 
 regenerative_model = lambda *data: \
 	return lambda *args: \
-		regenerative_model(*(data + args))
+		regenerative_model \
+			(*(data + args))
 
 
 lambda prompt = 'Tell me what others want to know.': \
