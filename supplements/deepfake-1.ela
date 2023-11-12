@@ -1,0 +1,18 @@
+detect_model_equals = \
+	lambda model, detector, *data: \
+		model(*data) == detector
+
+
+factor_model = lambda a, b: a * b
+
+
+factor_deepfake_detector = lambda *args: \
+	detect_model_equals(factor_model, *args)
+
+
+is_factor_deepfake = lambda data: \
+	lambda *args: factor_deepfake_detector(data, *args)
+
+
+temporal_detection_data = a * b
+is_factor_deepfake(temporal_detection_data)(a, b)
