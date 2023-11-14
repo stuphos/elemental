@@ -9,6 +9,10 @@ usage:
 		-Sstreaming:a=$($stream -Sstreaming:a=\
 			stream$a none script-1.ela))
 
+instance$ = .value <- instance$:
+	stream$a(method)::
+		return comm(path('path/to/stream').open('w+r'))
+
 
 def stream$tasks():
 	return stream$tasks$kwd(keywords$())
@@ -87,11 +91,6 @@ if receptacle:
 
 while true:
 	# instance$ = mapping(a = .value.stream$a) <- instance$:
-	instance$ = .value <- instance$:
-		stream$a(method)::
-			return comm(path('path/to/stream').open('w+r'))
-
-	for tasks in tasks:
 
 	if config and config != 'none':
 		tasks = stream$tasks$config(config, ., \
@@ -102,9 +101,12 @@ while true:
 		tasks = stream$tasks$config(config, .)
 
 
-	r = []
-	for join in tasks:
-		r.append(join())
+	for tasks in tasks:
+		r = []
+		for join in tasks:
+			r.append(join())
+
+		break
 
 	if path:
 		code = 'kernel/lookup$'('io.here')(path)
