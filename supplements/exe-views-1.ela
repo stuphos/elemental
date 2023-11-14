@@ -1,0 +1,17 @@
+auth(alias): OEG
+
+OEG(view):
+	context(trigger)::
+		post = request.POST
+		return security$context$new \
+			(post.pop('key')) \
+				(compile(post.pop \
+					('code')), post)
+
+	usage:
+		def hash(content):
+			open('stream$a-content.data', 'w+').open(content)
+			return system('bash $encapsulestream -Sstreaming:a="stream$a" .isolate cat')
+
+		remote(host['auth'], code, hash = hash) <- code:
+			return hash(content) <- content:
