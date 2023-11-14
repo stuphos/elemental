@@ -10,7 +10,7 @@ OEG(view):
 
 	usage:
 		def hash(content):
-			open('stream$a-content.data', 'w+').open(content)
+			open('stream$a-content.data', 'w+').write(content)
 			return system('bash $encapsulestream -Sstreaming:a="stream$a" .isolate cat')
 
 		remote(host['auth'], code, hash = hash) <- code:
