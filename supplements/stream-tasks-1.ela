@@ -1,0 +1,113 @@
+usage:
+	stream="$elabin -f stream-tasks-1.ela streaming"
+	cat > script-1.ela <<< EOF
+	return:
+		stream$a
+	EOF
+
+	echo $($stream -Sstreaming:b=$stream$b \
+		-Sstreaming:a=$($stream -Sstreaming:a=\
+			stream$a none script-1.ela))
+
+
+def stream$tasks():
+	return stream$tasks$kwd(keywords$())
+
+def stream$tasks$kwd(kwd):
+	r = []
+	a = []
+
+	for pair in kwd.items():
+		scatter(pair, 'n', 'v')
+		t = task$(v)
+
+		r.append(t.join)
+		a.append(n)
+
+	return [r, a]
+
+def stream$tasks$config(config, create):
+	r = mapping()
+
+	# This all means, are we using items = mapping() or configuration[config]?
+	kwd = keywords$()
+	items = kwd.get('items', none)
+
+	if config:
+		if is$not$none(items):
+			items = mapping(items)
+			valueOf = items.get
+		else:
+			section = getmember(kwd['configuration'], config)
+
+			items = section.options()
+			valueOf = section.get
+
+	else:
+		if is$none(items):
+			items = kwd
+
+		valueOf = items.get
+
+
+	# System activation integration.
+	# kwd = mapping() # keywords$()
+
+	for o in items:
+		v = valueOf(o)
+
+		# Hmm, optimize:
+		if is$string(v):
+			method = create[v]
+			v = method
+
+		r[o] = v # act(method, [o, v], kwd)
+
+	return stream$tasks$kwd(r)
+
+
+def comm(stream):
+	for msg in stream:
+		pass
+
+
+def innerActOf(procedure):
+	return procedure.innerAct
+
+innerActOf$on = innerActOf.action \
+	(action(action).innerAct)
+
+
+# Console.
+scatter$args(['config', none], ['path', none]) # ['receptacle', false])
+
+receptacle = false
+if receptacle:
+	comm = innerActOf$on(receptacle).action(comm.innerAct)
+
+while true:
+	# instance$ = mapping(a = .value.stream$a) <- instance$:
+	instance$ = .value <- instance$:
+		stream$a(method)::
+			return comm(path('path/to/stream').open('w+r'))
+
+	for tasks in tasks:
+
+	if config and config != 'none':
+		tasks = stream$tasks$config(config, ., \
+			configuration = 'kernel/lookup$' \
+				('builtins.configuration'))
+	else:
+		instance$ = mapping(a = .value.stream$a)
+		tasks = stream$tasks$config(config, .)
+
+
+	r = []
+	for join in tasks:
+		r.append(join())
+
+	if path:
+		code = 'kernel/lookup$'('io.here')(path)
+		code = compile(code.read())
+
+		'kernel/info'(act(code, mapping(args$stream = r)))
