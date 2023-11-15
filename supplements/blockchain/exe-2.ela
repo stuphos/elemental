@@ -1,18 +1,3 @@
-def method_pass():
-	pass
-def method_identity(**kwd):
-	return kwd
-
-def method_hash(*args, **kwd):
-	return sign(kwd['block'].signature, *args)
-
-def methodOf(name):
-	return globals()['method_' + name] # getattr(, 'method_' + name)
-
-def method(name, **kwd):
-	return methodOf(name)(**kwd)
-
-
 def action(*args, **kwd):
 	(method, *args) = args
 
@@ -21,9 +6,29 @@ def action(*args, **kwd):
 
 	return call
 
+
+def methodOf(name):
+	return globals()['method_' + name] # getattr(, 'method_' + name)
+
+def method(name, **kwd):
+	return methodOf(name)(**kwd)
+
+
+# Compilation method.
 def compile_doc(data):
-	return action(method, data.method, \
+	return action(method, \
+		data.method, \
 		**data.keywords)
+
+
+# Methods.
+def method_pass():
+	pass
+def method_identity(**kwd):
+	return kwd
+
+def method_hash(*args, **kwd):
+	return sign(kwd['block'].signature, *args)
 
 def method_compile_doc(**kwd):
 	return compile_doc(kwd['data'])
@@ -43,10 +48,7 @@ def call_block(block):
 			# depending on the block method.
 
 
-def method_module(**kwd):
-	pass
-
-
+# Blockchain methods.
 def sign_block(block):
 	return namespace \
 		(signature = sign(*call_block(block)),
@@ -80,6 +82,38 @@ def compile_python(code):
 def method_module_python(**kwd):
 	return action(compile_python \
 		(kwd['code'])().module)
+
+
+# Elemental-specific:
+def task_compileOf(action, task):
+	return action(task.native._compileTask, task)
+
+def ela_returnOperandCall(api, ns, proc):
+	# ns = dict() # namespace()
+
+	try: proc(ns)
+	except api.OuterFrame as sub:
+		@sub.onComplete
+		def op(frame, *error, **kwd):
+			if not error or error[1] is None:
+				frame.task.stack[-1] = ns
+
+	return ns # namespace(ns)
+
+def ela_currentTask_compileModule(action, code):
+	from stuphos import kernel
+
+	return ela_returnOperandCall \
+		(kernel, namespace(), task_compileOf \
+			(action, kernel.vmCurrentTask()) \
+				().evaluate)
+
+
+def method_module_ela(**kwd):
+	return ela_currentTask_compileModule \
+		(action, kwd['code'])
+
+method_module = method_module_ela
 
 
 # blockCycle_1_compiled = compile_blockCycle \
