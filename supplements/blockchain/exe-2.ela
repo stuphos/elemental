@@ -1,0 +1,110 @@
+def method_pass():
+	pass
+def method_identity(**kwd):
+	return kwd
+
+def method_hash(*args, **kwd):
+	return sign(kwd['block'].signature, *args)
+
+def methodOf(name):
+	return globals()['method_' + name] # getattr(, 'method_' + name)
+
+def method(name, **kwd):
+	return methodOf(name)(**kwd)
+
+
+def action(*args, **kwd):
+	(method, *args) = args
+
+	def call(*argsCall, **kwdCall):
+		return method(*(args + argsCall), **dict(kwd, **kwdCall))
+
+	return call
+
+def compile_doc(data):
+	return action(method, data.method, \
+		**data.keywords)
+
+def method_compile_doc(**kwd):
+	return compile_doc(kwd['data'])
+
+
+# Two are same except:
+def compile_blockCycle(block):
+	return compile_doc \
+		(block.data) \
+			(block = block)
+
+def call_block(block):
+	return compile_doc \
+		(block.data) \
+			(block)
+			# ...block is not set as keyword,
+			# depending on the block method.
+
+
+def method_module(**kwd):
+	pass
+
+
+def sign_block(block):
+	return namespace \
+		(signature = sign(*call_block(block)),
+		 data = namespace(method = 'identity'))
+
+
+def search(block, **kwd):
+	search = kwd.get('search', None) \
+		or (lambda o: o is None) # action(act, is_none)
+
+	while not search(block):
+		block = sign_block \
+			(block)
+
+	return block
+
+
+# Python-specific:
+def compile_python(code):
+	code = compile(code, '', 'exec')
+
+	def call(*args, **kwd):
+		ns = dict(kwd)
+		exec(code, ns)
+
+		return namespace \
+			(module = namespace(ns))
+
+	return call
+
+def method_module_python(**kwd):
+	return action(compile_python \
+		(kwd['code'])().module)
+
+
+# blockCycle_1_compiled = compile_blockCycle \
+# 	.action(.value) <- instance_:
+
+# 	signature: '0000'
+
+# 	data:
+# 		method(name): hash
+
+# 		keywords:
+# 			block:
+# 				method: compile_doc
+# 				keywords:
+# 					data:
+# 						method: pass
+
+
+# return search(.value) <- instance_:
+# 	signature: '0000'
+
+# 	data:
+# 		method: module
+# 		keywords:
+# 			code::
+# 				def call_(block):
+# 					return [block.signature, \
+# 						    string(block.data)]
