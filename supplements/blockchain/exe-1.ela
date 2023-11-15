@@ -1,0 +1,85 @@
+def method$pass():
+	pass
+def method$identity():
+	return keywords$()
+
+def method$hash():
+	return act(sign, [keywords$ \
+		('block').signature] + \
+		args$())
+
+def method(name):
+	return act(getmember(..[path$[-1]], \
+		'method$' + name), [], keywords$())
+
+def compile$doc(data):
+	return act(action, [method, \
+		data.method], data.keywords)
+
+def method$compile$doc():
+	return compile$doc \
+		(keywords$('data'))
+
+
+def compile$blockCycle(block):
+	return compile$doc \
+		(block.data) \
+			(block = block)
+
+
+blockCycle$1$compiled = compile$blockCycle \
+	.action(.value) <- instance$:
+
+	signature: '0000'
+
+	data:
+		method(name): hash
+
+		keywords:
+			block:
+				method: compile$doc
+				keywords:
+					data:
+						method: pass
+
+
+def method$module():
+	code = keywords$('code')
+
+	return action(compile \
+		(code).module)
+
+def call$block(block):
+	return compile$doc \
+		(block.data) \
+			(block)
+
+def sign$block(block):
+	return namespace \
+		(signature = act(sign, call$block(block)), \
+		 data = .value) <- instance$:
+
+		method: identity
+
+
+def search(block):
+	search = keywords$('search', none) \
+		or action(act, is$none)
+
+	while not search(block):
+		block = sign$block \
+			(block)
+
+	return block
+
+
+return search(.value) <- instance$:
+	signature: '0000'
+
+	data:
+		method: module
+		keywords:
+			code::
+				def call$(block):
+					return [block.signature, \
+						    string(block.data)]
