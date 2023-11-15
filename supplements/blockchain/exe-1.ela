@@ -26,21 +26,10 @@ def compile$blockCycle(block):
 		(block.data) \
 			(block = block)
 
-
-blockCycle$1$compiled = compile$blockCycle \
-	.action(.value) <- instance$:
-
-	signature: '0000'
-
-	data:
-		method(name): hash
-
-		keywords:
-			block:
-				method: compile$doc
-				keywords:
-					data:
-						method: pass
+def call$block(block):
+	return compile$doc \
+		(block.data) \
+			(block)
 
 
 def method$module():
@@ -49,10 +38,6 @@ def method$module():
 	return action(compile \
 		(code).module)
 
-def call$block(block):
-	return compile$doc \
-		(block.data) \
-			(block)
 
 def sign$block(block):
 	return namespace \
@@ -71,6 +56,22 @@ def search(block):
 			(block)
 
 	return block
+
+
+blockCycle$1$compiled = compile$blockCycle \
+	.action(.value) <- instance$:
+
+	signature: '0000'
+
+	data:
+		method(name): hash
+
+		keywords:
+			block:
+				method: compile$doc
+				keywords:
+					data:
+						method: pass
 
 
 return search(.value) <- instance$:
