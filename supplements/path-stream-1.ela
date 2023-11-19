@@ -1,0 +1,40 @@
+def pathNew(path):
+	nr = path.number
+	new = path(nr)
+
+	if not new.exists:
+		return new
+
+	for nr in path.recycled.listing:
+		new = path(nr.rootName)
+		if not new.exists:
+			# nr.unlink()
+
+			return new
+
+	else:
+		nr += 1
+
+		for i in range(work):
+			new = path(nr)
+
+			if not new.exists:
+				return new
+
+
+	error and raise errorClass(nr)
+
+def pathNewHEAD(path):
+	new = pathNew(path)
+
+	# 'current' is HEAD
+	current = path.current.read()
+
+	path('current.' + current).write(new)
+
+	return new
+
+
+def writeCall(path, format, o, method, *args):
+	return method(path, format, o, pathNewHEAD
+		(path).write(o, format), *args)

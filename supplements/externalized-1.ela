@@ -1,0 +1,99 @@
+'''
+x = dict(v = True)
+
+extern = externalization()
+extern[x] = 'x'
+
+unpickle(pickle(extern \
+	.externalizable \
+		(dict(a = x)))) \
+		['x'].internalize \
+			(extern)['v']
+
+'''
+
+class externalized:
+	def __init__(self, key, value, module, cls):
+		self._key = key
+		self._value = value
+		self._module = module
+		self._cls = cls
+
+	# def __setstate__(self, state):
+	#	self.__dict__ = state
+
+	def internalize(self, extern):
+		return extern._internalize \
+			(self._key, self._value,
+			 self._module, self._cls)
+
+
+class externalization(dict):
+	from copyreg import __newobj__
+
+	def externalizable(self, object):
+		return externalizable(self, object)
+
+	def _internalize(self, key, value, module, cls):
+		o = object.__new__(__import__ \
+			(self._module, fromlist = \
+				[self._cls]))
+
+		o.__setstate__(self._value)
+
+		return o
+
+	def _internalizeMap(self, items):
+		return dict((name, self._internalizeValue(value))
+					for (name, value) in items)
+
+	def _internalizeValue(self, value):
+		return value.internalize(self) \
+			   if isinstance(value, externalized)
+			   else value
+
+
+
+	def _externalize(self, name, value, *cls):
+		try: key = self[value]
+		except KeyError:
+			return value
+
+		return externalized \
+			(key, externalizable
+				(self, value), *cls)
+
+
+	@classmethod
+	def _dictOf(self, o):
+		return o.__dict__
+
+
+	def _reduceMap(self, items, *cls):
+		e = self._externalize
+
+		return dict((name, e(name, value, *cls))
+					for (name, value) in items)
+
+	def _reduce(self, o):
+		cls = (o.__module__, o.__name__)
+
+		return (self.__newobj__, cls,
+				self._reduceMap
+					(self._dictOf(o)
+						.items()))
+
+
+class externalizable:
+	def __init__(self, extern, object):
+		self._extern = extern
+		self._object = object
+
+	def __reduce__(self):
+		return self._extern \
+			._reduce(self._object)
+
+	def internalize(self):
+		return self._extern._internalizeMap \
+			(self._extern._dictOf(o).items())
+
