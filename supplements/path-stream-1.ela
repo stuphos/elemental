@@ -70,3 +70,31 @@ if __name__ == '__main__':
 
 	if args:
 		console('pickle', *args)
+
+
+	'''
+	sign(view):
+		context(trigger)::
+			access = request.user.securityContext
+
+			return act(sign, .compiled(mapping(access = \
+				 access,  request = request, identity = \
+				 access(programmer), container = container))) \
+
+			<- instance$:
+				try: method = request.GET['page']
+				except key$error:
+					return [container.key, identity, request.path]
+
+				try: path = request.GET['path']
+				except key$error: pass
+				else: method = method + '/' + path
+
+				scatter('text/json/loads' \
+					(access(page, string \
+						(method).response)), \
+					'key', 'path')
+
+				return [key, identity, path]
+
+				'''
