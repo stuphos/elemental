@@ -36,5 +36,37 @@ def pathNewHEAD(path):
 
 
 def writeCall(path, format, o, method, *args):
-	return method(path, format, o, pathNewHEAD
-		(path).write(o, format), *args)
+	return method([path, format, o, pathNewHEAD
+		(path).write(o, format)], *args)
+
+
+# action-concensus-1.ela
+# task$.action(ifCall, canGo) # , 'data', procedure)
+
+
+def shellCall(*args):
+	(path, *args) = args
+
+	return io.path(path) \
+		.pipe(*args) # or output
+
+def shell(path, format, *args):
+	return writeCall(path, format,
+		run, shellCall(*args))
+
+
+def console(format, *args):
+	# Format the result of the shell call.
+	(path, *args) = args
+
+	if args:
+		print(shell(path, format, *args))
+
+
+if __name__ == '__main__':
+	# $0 path-stream-1.data0001.dataspace echo path
+	from sys import argv
+	args = argv[1:]
+
+	if args:
+		console('pickle', *args)
