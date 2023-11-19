@@ -76,15 +76,17 @@ if __name__ == '__main__':
 	sign(view):
 		context(trigger)::
 			access = request.user.securityContext
+			at = string(now())
 
-			return act(sign, .compiled(mapping(access = \
-				 access,  request = request, identity = \
-				 access(programmer), container = container))) \
+			return at + '@' + act(sign, .compiled \
+				(mapping(identity = access(programmer), \
+				 request = request, access = access, \
+				 container = container, at = at))) \
 
 			<- instance$:
 				try: method = request.GET['page']
 				except key$error:
-					return [container.key, identity, request.path]
+					return [container.key, identity, at, request.path]
 
 				try: path = request.GET['path']
 				except key$error: pass
@@ -95,6 +97,6 @@ if __name__ == '__main__':
 						(method).response)), \
 					'key', 'path')
 
-				return [key, identity, path]
+				return [key, identity, at, path]
 
 				'''
