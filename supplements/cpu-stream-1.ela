@@ -100,5 +100,5 @@ def localComplete(path, method, message, args, kwd):
 scatter$args('dev', 'local')
 
 streamCpu(io.path(dev), \
-	localComplete, '', \
+	localComplete, 'cpu', \
 	io.path(local))
