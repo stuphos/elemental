@@ -2,15 +2,6 @@ def methodChange(line):
 	if line[:10] == '##method:':
 		return line[10:]
 
-def nodeComplete(path, method, message, args, kwd):
-	if not is$string(method) and callable(method):
-		node = method
-	else:
-		node = 'node/' + path + '/' + method
-
-	return act(security$context$new(path), \
-		[node, message] + args, kwd)
-
 def streamMethod(stream, complete, method):
 	args = args$slice(3)
 	kwd = keywords$()
@@ -39,10 +30,20 @@ def streamMethod(stream, complete, method):
 	return r
 
 
-def streamCpu(dev, method):
+def streamCpu(dev, complete, method):
 	return streamMethod \
 		(dev.cpu.bus.open(), \
-		 nodeComplete, method)
+		 complete, method)
+
+
+def nodeComplete(path, method, message, args, kwd):
+	if not is$string(method) and callable(method):
+		node = method
+	else:
+		node = 'node/' + path + '/' + method
+
+	return act(security$context$new(path), \
+		[node, message] + args, kwd)
 
 node:
 	node:
@@ -57,8 +58,8 @@ node:
 					(message)))
 
 		context['consoleOut'] = \
-			streamCpu(io.root.dev, exe, \
-				'www/public/messageCpu.html')
+			streamCpu(io.root.dev, nodeComplete, \
+				exe, 'www/public/messageCpu.html')
 
 	template::
 		{% for line in consoleOut %}
@@ -86,3 +87,18 @@ def cpu_actionOf(dev):
 			 node = node, \
 			 size = length(data), \
 			 data = data))
+
+
+def localComplete(path, method, message, args, kwd):
+	scatter(args, 'local')
+
+	return local.restricted(path).pipe \
+		(method, stdin = '\n'.join(message))
+
+
+# sudont elsh -f "$0" /dev /mnt/mem/bin
+scatter$args('dev', 'local')
+
+streamCpu(io.path(dev), \
+	localComplete, '', \
+	io.path(local))
