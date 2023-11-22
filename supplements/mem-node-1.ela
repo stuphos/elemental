@@ -1,0 +1,45 @@
+def mount_memoryFS(mountbin, path, size):
+    path.mkdir()
+
+    return mountbin.pipe('-t', 'tmpfs', 'tmpfs', path, '-o', 'size=' + size)
+
+def umount_memoryFS(umountbin, path):
+    return umountbin.pipe(path)
+
+
+def mount_memoryFS_path(mountbin, path, size):
+    mount_memoryFS(mountbin, path, size)
+    return path
+
+
+elsh -f "$0"|elsh -f -- <<< EOF
+'kernel/callObject$'('builtins.open', 'text/json/loads' \
+	('kernel/callObject$'('sys.stdin.read')), 'w+').write \
+		('text/json/dumps'(mapping(identity = 'node', \
+			method = 'gen/site-messaging/chat$stream')))
+EOF
+
+scatter$args(['mount', '/mnt/mem/op'])
+
+if is$not$none(mount):
+	mem = io.path(mount_memoryFS_path \
+		(io.root.usr.bin.mount, \
+		 mount, '100m')) \
+			.stream
+
+	mem.mkdir()
+
+	mem = mem(string('kernel/callObject$'('uuid.uuid4')))
+	mem.mkfifo()
+
+
+	json = 'text/json/dumps'
+
+	'kernel/info'(json(string(mem)))
+
+	for node in 'kernel/callObject$' \
+		('yaml.safe_load_all', mem.open()):
+
+		'kernel/info'(json(string \
+			(security$context$new(node['identity']) \
+				(call, node['method'], node))))
