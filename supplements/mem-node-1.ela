@@ -12,12 +12,12 @@ def mount_memoryFS_path(mountbin, path, size):
     return path
 
 
-elsh -f "$0"|elsh -f -- <<< EOF
-'kernel/callObject$'('builtins.open', 'text/json/loads' \
-	('kernel/callObject$'('sys.stdin.read')), 'w+').write \
-		('text/json/dumps'(mapping(identity = 'node', \
-			method = 'gen/site-messaging/chat$stream')))
-EOF
+# elsh -f "$0"|elsh -f -- <<< EOF
+# 'kernel/callObject$'('builtins.open', 'text/json/loads' \
+# 	('kernel/callObject$'('sys.stdin.read')), 'w+').write \
+# 		('text/json/dumps'(mapping(identity = 'node', \
+# 			method = 'gen/site-messaging/chat$stream')))
+# EOF
 
 scatter$args(['mount', '/mnt/mem/op'])
 
