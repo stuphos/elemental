@@ -1,0 +1,54 @@
+def methodChange(line):
+	if line[:10] == '##method:':
+		return line[10:]
+
+def nodeComplete(path, method, message, args, kwd):
+	if not is$string(method) and callable(method):
+		node = method
+	else:
+		node = 'node/' + path + '/' + method
+
+	return act(security$context$new(path), \
+		[node, message] + args, kwd)
+
+def streamCpu(dev, method):
+	return streamMethod \
+		(dev.cpu.bus.open(), \
+		 nodeComplete, method)
+
+def streamMethod(stream, complete, method):
+	args = args$slice(3)
+	kwd = keywords$()
+
+	message = []
+	r = none
+
+	for node in stream:
+		for line in stream:
+			method = methodChange(line)
+
+			if not method:
+				if line != '---':
+					message.append(line)
+				else:
+					r = act(complete, \
+						[node, method, \
+						 message] + args, \
+						 kwd)
+
+					message = []
+
+	return r
+
+
+# streamCpu(io.root.dev, exe.compileArgs('message', \
+# 	path = 'www/public/messageCpu.html')) <- exe:
+
+# 	return .panelOut(page(path, mapping \
+# 		(message = 'text/json/dumps' \
+# 			(message)).content)
+
+node:
+	node:
+		io(method)::
+			scatter$args('message')
