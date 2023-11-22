@@ -14,8 +14,8 @@ def mount_memoryFS_path(mountbin, path, size):
 
 # elsh -f "$0"|elsh -f -- <<< EOF
 # 'kernel/callObject$'('builtins.open', 'text/json/loads' \
-# 	('kernel/callObject$'('sys.stdin.read')), 'w+').write \
-# 		('text/json/dumps'(mapping(identity = 'node', \
+# 	(next('kernel/callObject$'('sys.stdin.read'))), 'w+'). \
+#		write('text/json/dumps'(mapping(identity = 'node', \
 # 			method = 'gen/site-messaging/chat$stream')))
 # EOF
 
