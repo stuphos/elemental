@@ -19,8 +19,8 @@ def streamMethod(stream, complete, method):
 				else:
 					r = act(complete, \
 						[node, method, \
-						 message] + args, \
-						 kwd)
+						 message, args, \
+						 kwd])
 
 					message = []
 
