@@ -37,9 +37,28 @@ if is$not$none(mount):
 
 	'kernel/info'(json(string(mem)))
 
-	for node in 'kernel/callObject$' \
-		('yaml.safe_load_all', mem.open()):
 
+	# Read method auth.
+    loadIter = run$python(code, \
+    	mapping(load = 'kernel/lookup$' \
+			('yaml.safe_load_all')), \
+    	valueName = 'parallelIter') <- code:
+
+    	def parallelIter(object):
+    		next = runtime[runtime.System.Engine.Pool] \
+		    	.pool.forTaskCurrent \
+		        (swap = True, billable = False) \
+		        	(next, load(object))
+
+		    try:
+			    while True:
+			    	yield next()
+
+			except StopIteration:
+				pass
+
+
+	for node in loadIter(mem.open()):
 		'kernel/info'(json(string \
 			(security$context$new(node['identity']) \
 				(call, node['method'], node))))
