@@ -11,11 +11,6 @@ def nodeComplete(path, method, message, args, kwd):
 	return act(security$context$new(path), \
 		[node, message] + args, kwd)
 
-def streamCpu(dev, method):
-	return streamMethod \
-		(dev.cpu.bus.open(), \
-		 nodeComplete, method)
-
 def streamMethod(stream, complete, method):
 	args = args$slice(3)
 	kwd = keywords$()
@@ -38,17 +33,56 @@ def streamMethod(stream, complete, method):
 
 					message = []
 
+					if line == '...':
+						break
+
 	return r
 
 
-# streamCpu(io.root.dev, exe.compileArgs('message', \
-# 	path = 'www/public/messageCpu.html')) <- exe:
-
-# 	return .panelOut(page(path, mapping \
-# 		(message = 'text/json/dumps' \
-# 			(message)).content)
+def streamCpu(dev, method):
+	return streamMethod \
+		(dev.cpu.bus.open(), \
+		 nodeComplete, method)
 
 node:
 	node:
 		io(method)::
 			scatter$args('message')
+
+(view):
+	context(trigger)::
+		def exe(message, path):
+			return page(path, mapping \
+				(message = 'text/json/dumps' \
+					(message)))
+
+		context['consoleOut'] = \
+			streamCpu(io.root.dev, exe, \
+				'www/public/messageCpu.html')
+
+	template::
+		{% for line in consoleOut %}
+		{% endfor %}
+
+
+def cpu_actionOf(dev):
+	return action(print, file = \
+		dev.cpu.bus.open('w+b'))
+
+	usage:
+		def instance$(instance$):
+			return cpu_actionOf() \
+				(message.format(.) \
+					.encode()) <- message:
+
+				#S{length}.{node}#S{size}.{data}
+
+
+		node = 'text/base64/decode'(node) <- node:
+		data = 'text/base64/decode'(data) <- data:
+
+		return .(mapping \
+			(length = length(node), \
+			 node = node, \
+			 size = length(data), \
+			 data = data))
