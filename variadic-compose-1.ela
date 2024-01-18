@@ -1,0 +1,21 @@
+return import$compile$cython(code).podClone <- code:
+        # code(cython$python_buildchain):
+
+        from ph.emulation.machine.model import TaskSingular
+        from stuphos.kernel import Machine, vmCurrentTask
+
+        class visit_While: # (asyncTransform.visit_While):
+            # Force generator function if while.
+            # render_indirection = asyncTransform.render_async_indirection
+
+            _method = 'cycle'
+
+            def render_indirection_args(self, context, node, kwd):
+                return (node.expr,) + node.body
+
+
+        def podClone(image):
+            return runtime[runtime.Multithreading.Core] \
+                .Start(TaskSingular(Coroutine(varCompose
+                    (asyncTransform, visit_While = visit_While)
+                        (image))))
