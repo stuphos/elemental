@@ -1,0 +1,58 @@
+def cycleOf(workUnits, cycle, checkpoint):
+    set$timeout(cycle, 'timeout')
+
+    while true:
+        try: workUnits.read()()
+        except timeout e:
+            checkpoint()
+            set$timeout(cycle, 'timeout')
+
+
+def workOf(cycle, checkpoint):
+    workUnits = channel()
+    return [workUnits, task$(cycleOf, workUnits, cycle, checkpoint)]
+
+
+def concensus():
+    def init$(dump):
+        .workers = []
+        .dump = dump
+
+    def enqueue(move, nr_submissions):
+        put = keywords$('put')
+        callers = []
+
+        for i in range(nr_submissions):
+            .workers.append(i)
+
+            ch = channel()
+            callers.append(ch)
+
+            put(action(move, i, ch.read))
+
+        return callers
+
+    def work(i, v):
+        .workers[i] = v()
+
+    def call$():
+        o = sequence() # identity
+        v = o
+
+        for i in .workers:
+            if v is o:
+                v = i
+            elif i != v:
+                return false
+
+        .dump(v)
+
+        return true
+
+
+    def dispatchTest(work, cycle):
+        # concensus([].append).dispatchTest(60 * 60)
+
+        return map(act, map(actionable('value'), \
+            .enqueue(.work, 10, put = workOf \
+                (cycle, .)[0].write)))
