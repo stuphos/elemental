@@ -1,0 +1,191 @@
+validate-css(view):
+	context(trigger)::
+		rule_parser = parserOf(cssGrammarScopeOf(), 'rule_list')
+
+		context['rules'] = rule_parser.parse \
+			(request.POST.get('css', css)) <- css:
+
+			body {
+				width: 100%;
+			}
+
+
+	rules:
+		- - - - - selector
+				- body
+
+			- - width
+			  - '100%'
+
+
+	template::
+		{% for rule in rules %}
+		  {% for selector_list in rule.0 %}
+		  	{% for selector_path in selector_list %}
+		  	  {% for selector in selector_path %}
+		  	    {{ selector }}
+		  	  {% endfor %}
+		  	  ,
+		  	{% endfor %}
+	  	  {% endfor %}
+
+	  	  {% templatetag openbrace %}
+	  	  {% for property in rule.1 %}
+	  	    {{ property.0 }}: {{ property.1 }};
+	  	  {% endfor %}
+	  	  {% templatetag closebrace %}
+		{% endfor %}
+
+
+	nf:
+		- - sequence
+		  - - - variable
+		  	  - for rule in rules
+		  	- - sequence
+		  	  - - - variable
+		  	      - for selector_list in rule.0
+		  	    - - sequence
+		  	      - - - variable
+		  	          - for selector_path in selector_list
+		  	        - - sequence
+		  	          - - - variable
+		  	              - for selector in selector_path
+		  	            - - variable
+		  	              - selector
+		  	        - - text
+		  	          - ','
+
+
+		  - - variable
+		    - templatetag openbrace
+		  - - sequence
+		    - - - variable
+		        - for property in rule.1
+		      - - variable
+		        - property.0
+		      - - text
+		        - ':'
+		      - - variable
+		        - property.1
+		      - - text
+		        - ';'
+
+		  - - variable
+		    - templatetag closebrace
+
+
+def plyYaccOf():
+	return 'kernel/lookup$'('ply.yacc.yacc')
+
+def parserOf(grammar, starting_rule):
+       # debug = False, # debug,
+       # errorlog = None, # if debug else yacc.NullLogger(),
+       # debugfile = None, # debugfile,
+
+	return plyYaccOf() \
+		(module = grammar, \
+         start = starting_rule, \
+         check_recursion = false)
+
+
+def cssGrammarScopeOf():
+	return run$python(code, valueName = true) <- code:
+		def t_STATEMENT(self, value):
+			r'[^\;]*'
+
+		def t_NAME(self, value):
+			r'[a-zA-Z_\-]+[a-zA-Z0-9_\-]*'
+
+
+		t_COMMA = r','
+		t_HASH = r'#'
+		t_DOT = r'.'
+		t_GT = r'>'
+		t_LBRACKET = r'['
+		t_RBRACKET = r']'
+		t_SEMICOLON = r';'
+		t_COLON = r':'
+
+
+		# Serialization Production
+		def p_selector_list(self, p):
+			'''
+			selector_list : selector_path COMMA selector_list
+						  | selector_path
+
+			'''
+
+			if len(p) == 4:
+				p[0] = [p[1]] + p[3]
+			else:
+				p[0] = [p[1]]
+
+
+		def p_selector_path(self, p):
+			'''
+			selector_path : selector
+						  | selector selector_path
+						  | HASH selector
+						  | DOT selector
+						  | GT selector
+						  | selector LBRACKET NAME RBRACKET
+
+			'''
+
+			if len(p) == 5:
+				p[0] = ['class', p[1], p[3]]
+			elif len(p) != 3:
+				p[0] = ['selector', p[1]]
+			else:
+				if isinstance(p[2], list):
+					p[0] = [p[1]] + p[2]
+				else:
+					p[0] = [p[1], p[2]]
+
+		def p_selector(self, p):
+			'''
+			selector : NAME
+
+			'''
+
+			p[0] = p[1]
+
+		def p_rule_list(self, p):
+			'''
+			rule_list : rule rule_list
+					  | rule
+
+			'''
+
+			if len(p) == 3:
+				p[0] = [p[1]] + p[2]
+			else:
+				p[0] = [p[1]]
+
+		def p_rule(self, p):
+			'''
+			rule : selector_list LBRACE property_list RBRACE
+
+			'''
+
+			p[0] = [p[0], p[2]]
+
+		def p_property_list(self, p):
+			'''
+			property_list : property SEMICOLON property_list
+						  | property
+
+			'''
+
+			if len(p) == 4:
+				p[0] = [p[1]] + p[3]
+			else:
+				p[0] = [p[1]]
+
+		def p_property(self, p):
+			'''
+			property: NAME COLON STATEMENT
+
+			'''
+
+			p[0] = [p[1], p[3]]
